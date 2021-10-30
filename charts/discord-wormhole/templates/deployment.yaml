@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "discord-wormhole.fullname" . }}
+  labels:
+    {{- include "discord-wormhole.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount | default 1}}
+  selector:
+    matchLabels:
+      {{- include "discord-wormhole.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "discord-wormhole.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          # TODO checks if values are defined
+          env:
+            - name: ADMIN_ID
+              value: {{ .Values.wormhole.ADMIN_ID}}
+            - name: BOT_ID
+              value: {{ .Values.wormhole.BOT_ID}}
+            - name: PREFIX
+              value: {{ .Values.wormhole.prefix}}
+            - name: LOGO_FILL
+              value: {{ .Values.wormhole.LOGO_FILL}}
+            - name: LOG_CHANNEL
+              value: {{ .Values.wormhole.LOG_CHANNEL}}
+            - name: LOG_LEVEL
+              value: {{ .Values.wormhole.LOG_LEVEL}}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.wormhole.secrets.token }}
+                optional: false
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
