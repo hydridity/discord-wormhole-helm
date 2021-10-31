@@ -44,6 +44,11 @@ spec:
               value: {{ .Values.wormhole.LOG_CHANNEL}}
             - name: LOG_LEVEL
               value: {{ .Values.wormhole.LOG_LEVEL}}
+              # TODO checks for definitions, and proper reference when using replication
+            - name: DATABASE_PATH
+              value: {{ template "discord-wormhole.redis.fullname" . }}-master
+            - name: DATABASE_PORT
+              value: {{ .Values.redis.master.containerPort | quote }}
           envFrom:
             - secretRef:
                 name: {{ .Values.wormhole.secrets.token }}
