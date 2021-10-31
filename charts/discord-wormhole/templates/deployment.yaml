@@ -33,17 +33,17 @@ spec:
           # TODO checks if values are defined
           env:
             - name: ADMIN_ID
-              value: {{ .Values.wormhole.ADMIN_ID}}
+              value: {{ .Values.wormhole.ADMIN_ID | quote}}
             - name: BOT_ID
-              value: {{ .Values.wormhole.BOT_ID}}
+              value: {{ .Values.wormhole.BOT_ID | quote}}
             - name: PREFIX
               value: {{ .Values.wormhole.prefix}}
             - name: LOGO_FILL
               value: {{ .Values.wormhole.LOGO_FILL}}
             - name: LOG_CHANNEL
-              value: {{ .Values.wormhole.LOG_CHANNEL}}
+              value: {{ .Values.wormhole.LOG_CHANNEL | quote}}
             - name: LOG_LEVEL
-              value: {{ .Values.wormhole.LOG_LEVEL}}
+              value: {{ .Values.wormhole.LOG_LEVEL | default "ERROR"}}
               # TODO checks for definitions, and proper reference when using replication
             - name: DATABASE_PATH
               value: {{ template "discord-wormhole.redis.fullname" . }}-master
@@ -51,7 +51,7 @@ spec:
               value: {{ .Values.redis.master.containerPort | quote }}
           envFrom:
             - secretRef:
-                name: {{ .Values.wormhole.secrets.token }}
+                name: {{ .Values.wormhole.secrets.token | default "wormhole-secret"}}
                 optional: false
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
